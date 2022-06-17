@@ -1,0 +1,123 @@
+[
+  {
+    "class": "",
+    "subject": "",
+    "name": "Câu 13 ",
+    "tag": "Nhận biết",
+    "question": "Cho hàm số y=f(x)y=f(x)y = f\\left( x \\right) đồng biến trên DDD và x1,x2∈Dx1,x2∈D{x_1},{x_2} \\in D mà x1>x2x1>x2{x_1} > {x_2}, khi đó:",
+    "image_question": [
+      {}
+    ],
+    "option": [
+      {
+        "title": "a. ",
+        "content": "f(x1)>f(x2)f(x1)>f(x2)f\\left( {{x_1}} \\right) > f\\left( {{x_2}} \\right) "
+      },
+      {
+        "title": "b. ",
+        "content": "f(x1)<f(x2)f(x1)<f(x2)f\\left( {{x_1}} \\right) < f\\left( {{x_2}} \\right)"
+      },
+      {
+        "title": "c. ",
+        "content": "f(x1)=f(x2)f(x1)=f(x2)f\\left( {{x_1}} \\right) = f\\left( {{x_2}} \\right)"
+      },
+      {
+        "title": "d. ",
+        "content": "f(x2)≥f(x1)f(x2)≥f(x1)f\\left( {{x_2}} \\right) \\ge f\\left( {{x_1}} \\right)"
+      }
+    ],
+    "solution": "Sử dụng định nghĩa hàm số đồng biến, hàm số nghịch biến",
+    "answer": "Hàm số yyy = f(x)f(x)f\\left( x \\right) đồng biến trên DDD nên:\nVới mọi x1,x2x1,x2{x_1},{x_2} ∈∈\\in DDD mà x1>x2x1>x2{x_1} > {x_2} thì f(x1)f(x1)f\\left( {{x_1}} \\right) > f(x2)f(x2)f\\left( {{x_2}} \\right).",
+    "correct_answer": "a",
+    "note": ""
+  },
+  {
+    "name": "Câu 14 ",
+    "tag": "Nhận biết",
+    "question": "Cho hàm số f(x)f(x)f\\left( x \\right) xác định và có đạo hàm trên (a;b)(a;b)\\left( {a;b} \\right). Nếu f′(x)<0,∀x∈(a;b)f′(x)<0,∀x∈(a;b)f'\\left( x \\right) < 0,\\forall x \\in \\left( {a;b} \\right) thì:",
+    "image_question": [],
+    "option": [
+      {
+        "title": "a. ",
+        "content": "Hàm số đồng biến trên (a;b)(a;b)\\left( {a;b} \\right)        "
+      },
+      {
+        "title": "b. ",
+        "content": "Hàm số nghịch biến trên (a;b)(a;b)\\left( {a;b} \\right)"
+      },
+      {
+        "title": "c. ",
+        "content": "Hàm số không đổi trên (a;b)(a;b)\\left( {a;b} \\right)"
+      },
+      {
+        "title": "d. ",
+        "content": "Hàm số vừa đồng biến vừa nghịch biến trên (a;b)(a;b)\\left( {a;b} \\right)"
+      }
+    ],
+    "solution": "Sử dụng định lý:",
+    "answer": "Sử dụng định lý về xét tính đồng biến, nghịch biến của hàm số trên một khoảng đã nêu ở phần phương pháp, ở đây khoảng K=(a;b)K=(a;b)K=(a;b) ta được:\nHàm số y=f(x)y=f(x)y = f\\left( x \\right) xác định và có đạo hàm f′(x)<0,∀x∈(a;b)f′(x)<0,∀x∈(a;b)f'\\left( x \\right) < 0,\\forall x \\in \\left( {a;b} \\right) thì f(x)f(x)f\\left( x \\right) nghịch biến trên (a;b)(a;b)\\left( {a;b} \\right).",
+    "correct_answer": "b",
+    "note": ""
+  },
+  {
+    "name": "Câu 16 ",
+    "tag": "Nhận biết",
+    "question": "Hình dưới là đồ thị hàm số y=f′(x)y=f′(x)y = f'\\left( x \\right). Hỏi hàm số y=f(x)y=f(x)y = f\\left( x \\right) đồng biến trên khoảng nào dưới đây?",
+    "image_question": [],
+    "option": [
+      {
+        "title": "a. ",
+        "content": "(0;1)(0;1)\\left( {0;1} \\right) và (2;+∞)(2;+∞)\\left( {2; + \\infty } \\right)"
+      },
+      {
+        "title": "b. ",
+        "content": "(1;2)(1;2)\\left( {1;2} \\right)"
+      },
+      {
+        "title": "c. ",
+        "content": "(2;+∞)(2;+∞)\\left( {2; + \\infty } \\right)"
+      },
+      {
+        "title": "d. ",
+        "content": "(0;1)(0;1)\\left( {0;1} \\right)"
+      }
+    ],
+    "solution": "Khi đạo hàm của hàm số mang dấu dương trên một khoảng thì hàm số đồng biến trên khoảng đó.",
+    "answer": "Hàm số y=f′(x)y=f′(x)y = f'\\left( x \\right) dương trong khoảng (2;+∞)(2;+∞)\\left( {2; + \\infty } \\right)\n⇒⇒ \\Rightarrow   Hàm số y=f(x)y=f(x)y = f\\left( x \\right) đồng biến trên (2;+∞)(2;+∞)\\left( {2; + \\infty } \\right)",
+    "correct_answer": "c",
+    "note": "Học sinh có thể nhầm lẫn đồ thị đề bài cho là đồ thị của hàm số y=f(x)y=f(x)y = f\\left( x \\right) dẫn đến chọn đáp án A."
+  },
+  {
+    "name": "Câu 19 ",
+    "tag": "Thông hiểu",
+    "question": "Cho hàm số y=f(x)y=f(x)y = f\\left( x \\right) có bảng biến thiên như hình vẽ, chọn kết luận đúng:\n                \n                    \n                ",
+    "image_question": [
+      {
+        "src": "https://cdn.vungoi.vn/vungoi/1529113112368_Capture.PNG",
+        "title": ""
+      }
+    ],
+    "option": [
+      {
+        "title": "a. ",
+        "content": "Hàm số đồng biến trên (−∞;3)(−∞;3)\\left( { - \\infty ;3} \\right)"
+      },
+      {
+        "title": "b. ",
+        "content": "Hàm số đồng biến trên (2;3)(2;3)\\left( {2;3} \\right)."
+      },
+      {
+        "title": "c. ",
+        "content": "Hàm số nghịch biến trên (−∞;3)(−∞;3)\\left( { - \\infty ;3} \\right)."
+      },
+      {
+        "title": "d. ",
+        "content": "Hàm số nghịch biến trên (2;+∞)(2;+∞)\\left( {2; + \\infty } \\right)"
+      }
+    ],
+    "solution": "Sử dụng định lý:",
+    "answer": "Từ bảng biến thiên ta thấy: f′(x)>0f′(x)>0f'\\left( x \\right) > 0 trên (2;3)(2;3)\\left( {2;3} \\right) nên hàm số đồng biến trên (2;3)(2;3)\\left( {2;3} \\right).\nf′(x)<0f′(x)<0f'\\left( x \\right) < 0 trên (−∞;2)(−∞;2)\\left( { - \\infty ;2} \\right) và (3;+∞)(3;+∞)\\left( {3; + \\infty } \\right) nên hàm số nghịch biến trên các khoảng (−∞;2)(−∞;2)\\left( { - \\infty ;2} \\right) và (3;+∞)(3;+∞)\\left( {3; + \\infty } \\right).",
+    "correct_answer": "b",
+    "note": "HS thường nhầm lẫn khi quan sát bảng biến thiên, một số bạn thấy chiều mũi tên đi từ −∞−∞ - \\infty  lên 333 rồi vội vàng kết luận hàm số đồng biến trên (−∞;3)(−∞;3)\\left( { - \\infty ;3} \\right) dẫn đến chọn sai đáp án."
+  }
+]
