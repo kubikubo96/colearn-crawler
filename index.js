@@ -100,14 +100,21 @@ const puppeteer = require('puppeteer');
             const tempData = await page.evaluate(async () => {
               let temp = [];
               let option = [];
+              let imageQuestion = [];
               let elmName = document.querySelectorAll('#quiz-single .vn-tit-question strong');
               let elmTag = document.querySelectorAll('#quiz-single .vn-tit-question .clf');
               let elmQuestion = document.querySelectorAll('#quiz-single .content-quiz');
+              let elmImageQuestion = document.querySelectorAll('.question-content .image-group img');
               let elmOption = document.querySelectorAll('.vn-box-answer .row > div');
               let elmSolution = document.querySelectorAll('.content-solution .solution-item p');
               let elmAnswer = document.querySelectorAll('#quiz-solution .solution-item div');
               let elmCorrectAnswer = document.querySelectorAll('.anwsers-correct span span');
 
+              elmImageQuestion = [...elmImageQuestion]
+              imageQuestion = await elmImageQuestion.map(item => ({
+                src: item.getAttribute('src'),
+                title: item.getAttribute('title')
+              }));
 
               elmOption = [...elmOption]
               option = await elmOption.map(item => ({
@@ -119,6 +126,7 @@ const puppeteer = require('puppeteer');
                 'name': elmName[0].textContent,
                 'tag': elmTag[0].textContent,
                 'question': elmQuestion[0].textContent,
+                'image_question': imageQuestion,
                 'option': option,
                 'solution': elmSolution[1].textContent,
                 'answer': elmAnswer[0].textContent,
@@ -130,7 +138,7 @@ const puppeteer = require('puppeteer');
             console.log(data);
             questions_number = questions_number + 1;
             // return;
-            // await page.waitForTimeout(2000 * 1000);
+            // await page.waitForTimeout(2000);
             await page.goBack()
           });
         } catch (error) {
