@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
@@ -109,33 +109,39 @@ const puppeteer = require('puppeteer');
               let elmSolution = document.querySelectorAll('.content-solution .solution-item p');
               let elmAnswer = document.querySelectorAll('#quiz-solution .solution-item div');
               let elmCorrectAnswer = document.querySelectorAll('.anwsers-correct span span');
+              let elmNote = document.querySelectorAll('.content-solution .note');
 
               elmImageQuestion = [...elmImageQuestion]
-              imageQuestion = await elmImageQuestion.map(item => ({
-                src: item.getAttribute('src'),
-                title: item.getAttribute('title')
-              }));
+              if (imageQuestion.length) {
+                imageQuestion = await elmImageQuestion.map(item => ({
+                  src: item.getAttribute('src'),
+                  title: item.getAttribute('title')
+                }));
+              }
 
               elmOption = [...elmOption]
-              option = await elmOption.map(item => ({
-                title: item.querySelector('.text-uppercase').textContent,
-                content: item.querySelector('div p').textContent,
-              }));
+              if (elmOption.length) {
+                option = await elmOption.map(item => ({
+                  title: item.querySelector('.text-uppercase').textContent,
+                  content: item.querySelector('div p').textContent,
+                }));
+              }
 
               temp.push({
-                'name': elmName[0].textContent,
-                'tag': elmTag[0].textContent,
-                'question': elmQuestion[0].textContent,
+                'name': elmName.length ? elmName[0].textContent : '',
+                'tag': elmTag.length ? elmTag[0].textContent : '',
+                'question': elmQuestion.length ? elmQuestion[0].textContent : '',
                 'image_question': imageQuestion,
                 'option': option,
-                'solution': elmSolution[1].textContent,
-                'answer': elmAnswer[0].textContent,
-                'correct_answer': elmCorrectAnswer[0].textContent,
+                'solution': elmSolution.length ? elmSolution[1].textContent : '',
+                'answer': elmAnswer.length ? elmAnswer[0].textContent : '',
+                'correct_answer': elmCorrectAnswer.length ? elmCorrectAnswer[0].textContent : '',
+                'note': elmNote.length ? elmNote[0].textContent : '',
               })
               return temp;
             });
             data = [...data, ...tempData]
-            console.log(data);
+            console.log(tempData);
             questions_number = questions_number + 1;
             // return;
             // await page.waitForTimeout(2000);
