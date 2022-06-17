@@ -2,24 +2,28 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 0, height: 0 });
   const baseUrl = 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html'
   await page.goto(baseUrl);
-  var data = [];
-  var subjects_number = 0;
-  var topics_number = 0;
-  var questions_number = 0;
-  var limit_subjects = 1;
-  var limit_topics = 1;
-  var limit_questions = 2;
 
   const elmMenus = '.menu a';
   const elmTopics = '.chapter-item .sub-string';
   const elmQuestions = '#list_relate-quiz .quiz-relate-item a';
+
+  var data = [];
+  var subjects_number = 0;
+  var topics_number = 0;
+  var questions_number = 0;
+  // var limit_subjects = elmMenus.length;
+  // var limit_topics = elmTopics.length;
+  // var limit_questions = elmQuestions.length - 1;
+  var limit_subjects = 0;
+  var limit_topics = 0;
+  var limit_questions = 10;
 
   /**
    * While list menu
@@ -30,6 +34,7 @@ const puppeteer = require('puppeteer');
      */
     try {
       await page.waitForSelector(elmMenus).then(async () => {
+        console.log("Go 1 subject");
         await page.$$eval(elmMenus, (element, subjects_number) => {
           element[subjects_number].click()
         }, subjects_number);
@@ -53,16 +58,15 @@ const puppeteer = require('puppeteer');
           await page.$$eval(elmTopics, (element, topics_number) => {
             element[topics_number].click()
           }, topics_number);
-          if (topics_number >= elmTopics.length) {
+          if (topics_number >= limit_topics) {
             subjects_number = subjects_number + 1;
-            page.goBack()
           }
           console.log("topics_number:" + topics_number
           );
           // await page.waitForTimeout(2000);
         });
       } catch (error) {
-        page.goBack()
+        await page.goBack()
       }
 
       /**
@@ -77,15 +81,14 @@ const puppeteer = require('puppeteer');
             await page.$$eval(elmQuestions, (element, questions_number) => {
               element[questions_number].click()
             }, questions_number);
-            if (questions_number >= elmQuestions.length) {
+            if (questions_number >= limit_questions) {
               topics_number = topics_number + 1;
-              page.goBack()
             }
             console.log("questions_number:" + questions_number);
             // await page.waitForTimeout(2000);
           });
         } catch (error) {
-          page.goBack()
+          await page.goBack()
         }
 
         /**
@@ -107,7 +110,7 @@ const puppeteer = require('puppeteer');
 
 
               elmOption = [...elmOption]
-              option = elmOption.map(item => ({
+              option = await elmOption.map(item => ({
                 title: item.querySelector('.text-uppercase').textContent,
                 content: item.querySelector('div p').textContent,
               }));
@@ -121,7 +124,6 @@ const puppeteer = require('puppeteer');
                 'answer': elmAnswer[0].textContent,
                 'correct_answer': elmCorrectAnswer[0].textContent,
               })
-              console.log(temp);
               return temp;
             });
             data = [...data, ...tempData]
@@ -129,35 +131,34 @@ const puppeteer = require('puppeteer');
             questions_number = questions_number + 1;
             // return;
             // await page.waitForTimeout(2000 * 1000);
-            page.goBack()
+            await page.goBack()
           });
         } catch (error) {
-          page.goBack()
+          await page.goBack()
         }
 
         //break
         if (questions_number > limit_questions - 1) {
-          console.log("_________---------------__________ DONE 1 STEP question _________---------------__________ \n \n \n \n \n");
+          console.log("*******  DONE 1 STEP QUESTON ************* \n");
+          await page.goBack()
           break;
         }
       }
 
       //break
-      page.goto(baseUrl)
+      // page.goto(baseUrl)
       if (topics_number > limit_topics - 1) {
-        console.log("_________---------------__________ DONE 1 STEP topics _________---------------__________ \n \n \n \n \n");
+        console.log("**********  DONE 1 STEP TOPIC *********** \n");
+        await page.goBack()
         break;
       }
-
     }
 
     //break
-    page.goto(baseUrl)
     await page.waitForTimeout(2000);
     if (subjects_number > limit_subjects - 1) {
-      console.log("_________---------------__________FINISH ALL! _________---------------__________ \n \n \n \n \n");
+      console.log("************* !!! FINISH ALL !!!! ************* \n");
       break;
-      return;
     }
   }
   // await browser.close();
