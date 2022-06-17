@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
@@ -56,8 +56,7 @@ const puppeteer = require('puppeteer');
           if (topics_number >= elmTopics.length) {
             subjects_number = subjects_number + 1;
           }
-          console.log("topics_number:" + topics_number
-          );
+          console.log("topics_number:" + topics_number);
           // await page.waitForTimeout(2000);
         });
       } catch (error) {
@@ -95,8 +94,25 @@ const puppeteer = require('puppeteer');
               let temp = [];
               let elmName = document.querySelectorAll('#quiz-single .vn-tit-question strong');
               let elmTag = document.querySelectorAll('#quiz-single .vn-tit-question .clf');
+              let elmQuestion = document.querySelectorAll('#quiz-single .vn-tit-question .content-quiz');
+              // let elmOption = document.querySelectorAll('.vn-box-answer .row div.not-active');
+              // let elmSolution = document.querySelectorAll('.content-solution .solution-item p');
+              // let elmAnswer = document.querySelectorAll('#quiz-solution .solution-item div');
 
-              temp.push({ 'name': elmName[0].textContent, 'tag': elmTag[0].textContent })
+              elmOption = [...elmOption]
+              // let option = elmOption.map(item => ({
+              //   title: item.querySelector('.text-uppercase').textContent,
+              //   content: item.querySelector('div p').textContent,
+              // }));
+
+              temp.push({
+                'name': elmName[0].textContent,
+                'tag': elmTag[0].textContent,
+                'question': elmQuestion[0].textContent,
+                // 'option': option,
+                // 'solution': elmSolution[1].textContent,
+                // 'answer': elmAnswer[0].textContent,
+              })
 
               return temp;
             });
@@ -112,10 +128,7 @@ const puppeteer = require('puppeteer');
 
         //break
         if (questions_number > limit_questions) {
-          console.log("_________---------------__________ DONE 1 STEP question _________---------------__________");
-          console.log("|");
-          console.log("|");
-          console.log("|");
+          console.log("-+-FINISH 1 STEP questions-+-");
           break;
         }
       }
@@ -123,10 +136,7 @@ const puppeteer = require('puppeteer');
       //break
       page.goto(baseUrl)
       if (topics_number > limit_topics) {
-        console.log("_________---------------__________ DONE 1 STEP topics _________---------------__________");
-        console.log("|");
-        console.log("|");
-        console.log("|");
+        console.log("-+-FINISH 1 STEP topics-+-");
         break;
       }
 
@@ -134,11 +144,9 @@ const puppeteer = require('puppeteer');
 
     //break
     page.goto(baseUrl)
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(2000);
     if (subjects_number > limit_subjects) {
-      console.log("_________---------------__________FINISH ALL! _________---------------__________"); console.log("|");
-      console.log("|");
-      console.log("|");
+      console.log("_________++++++++++ FINISH ALL! ++++++++++_________");
       break;
     }
   }
