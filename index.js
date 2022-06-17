@@ -1,5 +1,8 @@
 const puppeteer = require('puppeteer');
+const axios = require('axios').default;
 const fs = require('fs');
+require('dotenv').config();
+
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -11,20 +14,25 @@ const fs = require('fs');
   const baseUrl = 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html'
   await page.goto(baseUrl);
 
-  const elmMenus = '.menu a';
-  const elmTopics = '.chapter-item .sub-string';
+  const TIME_OUT = 100;
+
+  const elmSubjects = '.menu a';
+  const elmTopics = '.list-chapters .sub-string';
   const elmQuestions = '#list_relate-quiz .quiz-relate-item a';
 
   var data = [];
-  var subjects_number = 0;
-  var topics_number = 0;
-  var questions_number = 0;
-  // var limit_subjects = elmMenus.length;
-  // var limit_topics = elmTopics.length;
-  // var limit_questions = elmQuestions.length - 1;
+  var total = 0;
+  var number_subjects = 0;
+  var number_topics = 0;
+  var number_questions = 0;
+
   var limit_subjects = 0;
   var limit_topics = 0;
-  var limit_questions = 4;
+  var limit_questions = 0;
+
+  var url_question = '';
+  var name_subject = '';
+  var name_topic = '';
 
   /**
    * While list menu
@@ -34,15 +42,20 @@ const fs = require('fs');
      * B1. Go 1 subject
      */
     try {
-      await page.waitForSelector(elmMenus).then(async () => {
-        await page.$$eval(elmMenus, (element, subjects_number) => {
-          element[subjects_number].click()
-        }, subjects_number);
+      await page.waitForSelector(elmSubjects).then(async () => {
 
-        console.log("subjects_number:" + subjects_number);
+        // limit_subjects = await page.$$eval(elmSubjects, (elm) => elm.length);
+        name_subject = await page.$$eval('.menu .menu__item-name', (elm, number_subjects) => {
+          return elm[number_subjects].getAttribute('title')
+        }, number_subjects);
+
+        await page.$$eval(elmSubjects, (element, number_subjects) => {
+          element[number_subjects].click()
+        }, number_subjects);
       });
     } catch (error) {
-      page.goto(baseUrl)
+      sendTele(error, [], 'waitForSelector elmSubjects');
+      // page.goto(baseUrl)
     }
 
     /**
@@ -54,18 +67,22 @@ const fs = require('fs');
         */
       try {
         await page.waitForSelector(elmTopics).then(async () => {
-          await page.$$eval(elmTopics, (element, topics_number) => {
-            element[topics_number].click()
-          }, topics_number);
-          if (topics_number >= limit_topics) {
-            subjects_number = subjects_number + 1;
-            // await page.goBack()
+
+          // limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
+          name_topic = await page.$$eval(elmTopics, (elm, number_topics) => {
+            return elm[number_topics].getAttribute('title')
+          }, number_topics);
+
+          await page.$$eval(elmTopics, (element, number_topics) => {
+            element[number_topics].click()
+          }, number_topics);
+          if (number_topics > limit_topics) {
+            number_subjects = number_subjects + 1;
           }
-          console.log("topics_number:" + topics_number);
-          // await page.waitForTimeout(2000);
         });
       } catch (error) {
-        await page.goBack()
+        sendTele(error, [], 'waitForSelector elmTopics');
+        // await page.goBack()
       }
 
       /**
@@ -77,96 +94,197 @@ const fs = require('fs');
         */
         try {
           await page.waitForSelector(elmQuestions).then(async () => {
-            await page.$$eval(elmQuestions, (element, questions_number) => {
-              element[questions_number].click()
-            }, questions_number);
-            if (questions_number >= limit_questions) {
-              topics_number = topics_number + 1;
+
+            limit_questions = await page.$$eval(elmQuestions, (elm) => elm.length);
+
+            await page.$$eval(elmQuestions, (element, number_questions) => {
+              element[number_questions].click()
+            }, number_questions);
+            if (number_questions > limit_questions) {
+              number_topics = number_topics + 1;
             }
-            console.log("limit_questions:" + limit_questions);
-            console.log("limit_subjects:" + limit_subjects);
-            console.log("limit_topics:" + limit_topics);
-            console.log("questions_number:" + questions_number);
-            // await page.waitForTimeout(2000);
+
+            console.log("[subjects] limit:  " + limit_subjects + ", number:  " + number_subjects);
+            console.log("[topics] limit:    " + limit_topics + ", number:  " + number_topics);
+            console.log("[questions] limit: " + limit_questions + ", number: " + number_questions);
+
           });
+
         } catch (error) {
-          await page.goBack()
+          sendTele(error, [], 'waitForSelector elmQuestions');
+          // await page.goBack()
         }
 
         /**
         * B4. Get data questions
         */
-        try {
-          await page.waitForSelector('#quiz-single').then(async () => {
-            await page.waitForTimeout(1000);
-            const tempData = await page.evaluate(async () => {
-              let temp = [];
-              let option = [];
-              let imageQuestion = [];
-              let elmName = document.querySelectorAll('#quiz-single .vn-tit-question strong');
-              let elmTag = document.querySelectorAll('#quiz-single .vn-tit-question .clf');
-              let elmQuestion = document.querySelectorAll('#quiz-single .content-quiz');
-              let elmImageQuestion = document.querySelectorAll('.question-content .image-item img');
-              let elmOption = document.querySelectorAll('.vn-box-answer .row > div');
-              let elmSolution = document.querySelectorAll('.content-solution .solution-item p');
-              let elmAnswer = document.querySelectorAll('#quiz-solution .solution-item div');
-              let elmCorrectAnswer = document.querySelectorAll('.anwsers-correct span span');
-              let elmNote = document.querySelectorAll('.content-solution .note');
+        // try {
+        let elmName = '#quiz-single .vn-tit-question strong';
+        let elmTag = '#quiz-single .vn-tit-question .clf';
+        let elmQuestion = '#quiz-single .content-quiz';
+        let elmImageQuestion = '#quiz-single img';
+        let elmOption = '.vn-box-answer .row > div';
+        let elmSolution = '.content-solution .solution-item p';
+        let elmAnswer = '#quiz-solution .solution-item div';
+        let elmCorrectAnswer = '.anwsers-correct span span';
+        let elmNote = '.content-solution .note';
 
-              elmImageQuestion = [...elmImageQuestion]
-              if (elmImageQuestion.length) {
-                imageQuestion = await elmImageQuestion.map(item => ({
-                  src: item.getAttribute('src'),
-                  title: item.getAttribute('title')
-                }));
-              }
-
-              elmOption = [...elmOption]
-              if (elmOption.length) {
-                option = await elmOption.map(item => ({
-                  title: item.querySelector('.text-uppercase').textContent,
-                  content: item.querySelector('div p').textContent,
-                }));
-              }
-
-              temp.push({
-                'name': elmName.length ? elmName[0].textContent : '',
-                'tag': elmTag.length ? elmTag[0].textContent : '',
-                'question': elmQuestion.length ? elmQuestion[0].textContent : '',
-                'image_question': imageQuestion,
-                'option': option,
-                'solution': elmSolution.length ? elmSolution[1].textContent : '',
-                'answer': elmAnswer.length ? elmAnswer[0].textContent : '',
-                'correct_answer': elmCorrectAnswer.length ? elmCorrectAnswer[0].textContent : '',
-                'note': elmNote.length ? elmNote[0].textContent : '',
-              })
-              return temp;
-            });
-            data = [...data, ...tempData]
-            console.log(tempData);
-            questions_number = questions_number + 1;
-            // return;
-            // await page.waitForTimeout(2000);
-            await page.goBack()
-          });
-        } catch (error) {
-          await page.goBack()
+        let temp_data = {
+          'url_question': url_question,
+          'name_subject': name_subject,
+          'name_topic': name_topic,
+          'name': '',
+          'tag': '',
+          'question': '',
+          'image_question': [],
+          'option': [],
+          'solution': '',
+          'answer': '',
+          'correct_answer': '',
+          'note': '',
         }
 
+        /**
+         * GET Name
+         */
+        try {
+          await page.waitForSelector(elmName, { timeout: TIME_OUT }).then(async () => {
+            url_question = page.url();
+            temp_data.name = await page.$$eval(elmName, (elm) => elm[0].textContent);
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get name', page.url());
+        }
+
+        /**
+        * GET Tag
+        */
+        try {
+          await page.waitForSelector(elmTag, { timeout: TIME_OUT }).then(async () => {
+            temp_data.tag = await page.$$eval(elmTag, (elm) => elm[0].textContent);
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get tag', page.url());
+        }
+
+        /**
+        * GET Question
+        */
+        try {
+          await page.waitForSelector(elmQuestion, { timeout: TIME_OUT }).then(async () => {
+            temp_data.question = await page.$$eval(elmQuestion, (elm) => elm[0].textContent);
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get question', page.url());
+        }
+
+        /**
+        * GET Image
+        */
+        try {
+          await page.waitForSelector(elmImageQuestion, { timeout: TIME_OUT }).then(async () => {
+            const image_question = await page.evaluate(async (elmImageQuestion) => {
+              let elm = document.querySelectorAll(elmImageQuestion)
+              elm = [...elm]
+              let data = elm.map(item => ({
+                src: item.getAttribute('src'),
+                title: item.getAttribute('title')
+              }));
+              return data;
+            }, elmImageQuestion)
+            temp_data.image_question = image_question;
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get image', page.url());
+        }
+
+
+        /**
+        * GET Option
+        */
+        try {
+          await page.waitForSelector(elmOption, { timeout: TIME_OUT }).then(async () => {
+            const option = await page.evaluate(async (elmOption) => {
+              let elm = document.querySelectorAll(elmOption)
+              elm = [...elm]
+              let data = elm.map(item => ({
+                title: item.querySelector('.text-uppercase').textContent,
+                content: item.querySelector('div p').textContent,
+              }));
+              return data;
+            }, elmOption)
+            temp_data.option = option;
+          })
+
+        } catch (error) {
+          sendTele(error, temp_data, 'get option', page.url());
+        }
+
+        /**
+        * GET Solution
+        */
+        try {
+          await page.waitForSelector(elmSolution, { timeout: TIME_OUT }).then(async () => {
+            temp_data.solution = await page.$$eval(elmSolution, (elm) => elm[1].textContent);
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get solution', page.url());
+        }
+
+        /**
+        * GET Answer
+        */
+        try {
+          await page.waitForSelector(elmAnswer, { timeout: TIME_OUT }).then(async () => {
+            temp_data.answer = await page.$$eval(elmAnswer, (elm) => elm[0].textContent);
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get answer', page.url());
+        }
+
+        /**
+        * GET Correct answer
+        */
+        try {
+          await page.waitForSelector(elmCorrectAnswer, { timeout: TIME_OUT }).then(async () => {
+            temp_data.correct_answer = await page.$$eval(elmCorrectAnswer, (elm) => elm[0].textContent);
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get correct answer', page.url());
+        }
+
+        /**
+        * GET Note
+        */
+        try {
+          await page.waitForSelector(elmNote, { timeout: TIME_OUT }).then(async () => {
+            temp_data.note = await page.$$eval(elmNote, (elm) => elm[0].textContent);
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'get note', page.url());
+        }
+
+
+        console.log("=================================");
+        console.log("||          " + total + "       ||");
+        console.log("=================================");
+        data.push(temp_data)
+        number_questions = number_questions + 1;
+        total = total + 1;
+        await page.goBack()
+        // await page.waitForTimeout(2000 * 1000);
+
         //break
-        if (questions_number > limit_questions - 1) {
-          questions_number = 0;
-          console.log("*******  DONE 1 STEP QUESTON ************* \n");
-          fs.writeFileSync('question_topic_' + topics_number + '.json', JSON.stringify(data));
+        if (number_questions >= limit_questions) {
+          number_questions = 0;
           await page.goBack()
           break;
         }
       }
 
       //break
-      // page.goto(baseUrl)
-      if (topics_number > limit_topics - 1) {
-        topics_number = 0;
+      if (number_topics >= limit_topics) {
+        number_topics = 0;
         console.log("**********  DONE 1 STEP TOPIC *********** \n");
         await page.goBack()
         break;
@@ -175,10 +293,31 @@ const fs = require('fs');
 
     //break
     await page.waitForTimeout(2000);
-    if (subjects_number > limit_subjects - 1) {
+    if (number_subjects >= limit_subjects) {
+      fs.writeFileSync('questions.json', JSON.stringify(data));
       console.log("************* !!! FINISH ALL !!!! ************* \n");
       break;
     }
   }
   // await browser.close();
 })();
+
+
+function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
+  if (error.name != 'TimeoutError') {
+    let html = '';
+    html += '<b>[Lỗi] : </b><code>' + JSON.stringify(error) + '</code> \n';
+    html += '<b>[Note] : </b><code>' + note + '</code> \n';
+    html += '<b>[URL] : </b><code>' + url + '</code> \n';
+    html += '<b>[line] : </b><code>' + line + '</code> \n';
+    html += '<b>[data] : </b><code>' + JSON.stringify(data_tpm) + '</code> \n';
+
+    axios.post(process.env.TELE_URL, {
+      chat_id: process.env.TELE_CHAT_ID,
+      text: html,
+    }).then(function (response) {
+    })
+      .catch(function (error) {
+      });
+  }
+}
