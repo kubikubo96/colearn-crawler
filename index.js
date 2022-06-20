@@ -6,15 +6,29 @@ require('dotenv').config();
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 0, height: 0 });
-  const baseUrl = 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html'
-  await page.goto(baseUrl);
+  const baseUrl = 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html';
 
-  const TIME_OUT = 100;
+  const listSubjects = [
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html', 'name': 'toan' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-ly-s5af3ead5f4ed8c11759c1add.html', 'name': 'ly' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-hoa-s5af3ead5f4ed8c11759c1adc.html', 'name': 'hoa' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-sinh-s5af3ead5f4ed8c11759c1adb.html', 'name': 'sinh' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-van-s5d14722fbcafcc004810c09f.html', 'name': 'van' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-tieng-anh-s5b7f644c5b9305855ffadced.html', 'name': 'anh' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-tieng-anh-moi-s5f1e3ac59d96250022154460.html', 'name': 'anh-new' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-su-s5b3d7dd3d9e263cf2e5a16c3.html', 'name': 'su' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-dia-s5b3d7ddcd9e263cf2e5a16c4.html', 'name': 'dia' },
+    { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-gdcd-s5d61eaf3ea5cb900220fa953.html', 'name': 'gdcd' },
+  ];
+
+  // await page.goto(baseUrl);
+
+  const TIME_OUT = 1500;
 
   const elmSubjects = '.menu a';
   const elmTopics = '.list-chapters .sub-string';
@@ -24,12 +38,13 @@ require('dotenv').config();
   var total = 0;
   var number_subjects = 0;
   var number_topics = 0;
-  var number_questions = 25;
+  var number_questions = 28;
 
-  var limit_subjects = 1;
-  var limit_topics = 2;
-  var limit_questions = 1;
+  var limit_subjects = 10;
+  var limit_topics = 0;
+  var limit_questions = 0;
 
+  var title_subject = '';
   var name_subject = '';
   var name_topic = '';
 
@@ -41,20 +56,12 @@ require('dotenv').config();
      * B1. Go 1 subject
      */
     try {
-      await page.waitForSelector(elmSubjects).then(async () => {
-
-        // limit_subjects = await page.$$eval(elmSubjects, (elm) => elm.length);
-        name_subject = await page.$$eval('.menu .menu__item-name', (elm, number_subjects) => {
-          return elm[number_subjects].getAttribute('title')
-        }, number_subjects);
-
-        await page.$$eval(elmSubjects, (element, number_subjects) => {
-          element[number_subjects].click()
-        }, number_subjects);
-      });
+      await page.goto(listSubjects[number_subjects].url)
+      title_subject = await page.$$eval('.menu .menu__item-name', (elm, number_subjects) => {
+        return elm[number_subjects].getAttribute('title')
+      }, number_subjects);
     } catch (error) {
       sendTele(error, [], 'waitForSelector elmSubjects');
-      // page.goto(baseUrl)
     }
 
     /**
@@ -67,7 +74,8 @@ require('dotenv').config();
       try {
         await page.waitForSelector(elmTopics).then(async () => {
 
-          // limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
+          limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
+
           name_topic = await page.$$eval(elmTopics, (elm, number_topics) => {
             return elm[number_topics].getAttribute('title')
           }, number_topics);
@@ -78,7 +86,6 @@ require('dotenv').config();
         });
       } catch (error) {
         sendTele(error, [], 'waitForSelector elmTopics');
-        // await page.goBack()
       }
 
       /**
@@ -104,7 +111,6 @@ require('dotenv').config();
 
         } catch (error) {
           sendTele(error, [], 'waitForSelector elmQuestions');
-          // await page.goBack()
         }
 
         /**
@@ -123,7 +129,8 @@ require('dotenv').config();
 
         let temp_data = {
           'url_question': '',
-          'name_subject': name_subject,
+          'title_subject': title_subject,
+          'name_subject': listSubjects[number_subjects].name,
           'name_topic': name_topic,
           'name': '',
           'tag': '',
@@ -203,6 +210,7 @@ require('dotenv').config();
         */
         try {
           await page.waitForSelector(elmOption, { timeout: TIME_OUT }).then(async () => {
+            temp_data.url_question = page.url();
             const option = await page.evaluate(async (elmOption) => {
               let elm = document.querySelectorAll(elmOption)
               elm = [...elm]
@@ -263,24 +271,25 @@ require('dotenv').config();
           sendTele(error, temp_data, 'GET Note', page.url());
         }
 
-        data.push(temp_data)
-        number_questions = number_questions + 1;
-        total = total + 1;
+        if (number_questions < limit_questions) {
+          data.push(temp_data)
+          number_questions = number_questions + 1;
+          total = total + 1;
 
-        console.log("=================================");
-        console.log("||          " + total + "       ||");
-        console.log("=================================");
+          console.log("=================================");
+          console.log("||          " + total + "       ||");
+          console.log("=================================");
 
-        await page.goBack()
-        // await page.waitForTimeout(2000 * 1000);
+          await page.goBack()
+        }
 
         //break
         if (number_questions >= limit_questions) {
           number_topics = number_topics + 1;
           number_questions = 0;
           saveData(data);
+          await page.goto(listSubjects[number_subjects].url)
           data = [];
-          await page.goBack();
           console.log("**********  DONE 1 STEP TOPIC *********** \n");
           break;
         }
@@ -292,7 +301,7 @@ require('dotenv').config();
         number_topics = 0;
         saveData(data);
         console.log("**********  DONE 1 STEP TOPIC *********** \n");
-        await page.goBack()
+        await page.goto(listSubjects[number_subjects].url)
         break;
       }
     }
