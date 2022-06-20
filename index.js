@@ -1,6 +1,8 @@
 const puppeteer = require('puppeteer');
 const axios = require('axios').default;
 require('dotenv').config();
+const fs = require('fs');
+const { exit } = require('process');
 
 
 (async () => {
@@ -37,7 +39,7 @@ require('dotenv').config();
   var limit_questions = 0;
 
   var number_subjects = 0;
-  var number_topics = 25;
+  var number_topics = 30;
   var number_questions = 0;
 
   var title_subject = '';
@@ -57,7 +59,7 @@ require('dotenv').config();
         return elm[number_subjects].getAttribute('title')
       }, number_subjects);
     } catch (error) {
-      sendTele(error, [], 'waitForSelector elmSubjects');
+      await sendTele(error, [], 'waitForSelector elmSubjects');
     }
 
     /**
@@ -81,7 +83,7 @@ require('dotenv').config();
           }, number_topics);
         });
       } catch (error) {
-        sendTele(error, [], 'waitForSelector elmTopics');
+        await sendTele(error, [], 'waitForSelector elmTopics');
       }
 
       /**
@@ -106,7 +108,7 @@ require('dotenv').config();
           });
 
         } catch (error) {
-          sendTele(error, [], 'waitForSelector elmQuestions');
+          await sendTele(error, [], 'waitForSelector elmQuestions');
         }
 
         /**
@@ -149,7 +151,7 @@ require('dotenv').config();
             temp_data.url_question = page.url();
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Name', page.url());
+          // sendTele(error, temp_data, 'GET Name', page.url());
         }
 
         /**
@@ -160,7 +162,7 @@ require('dotenv').config();
             temp_data.name = await page.$$eval(elmName, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Name', page.url());
+          // sendTele(error, temp_data, 'GET Name', page.url());
         }
 
         /**
@@ -171,7 +173,7 @@ require('dotenv').config();
             temp_data.tag = await page.$$eval(elmTag, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, ' GET Tag', page.url());
+          // sendTele(error, temp_data, ' GET Tag', page.url());
         }
 
         /**
@@ -182,7 +184,7 @@ require('dotenv').config();
             temp_data.question = await page.$$eval(elmQuestion, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Question', page.url());
+          // sendTele(error, temp_data, 'GET Question', page.url());
         }
 
         /**
@@ -202,7 +204,7 @@ require('dotenv').config();
             temp_data.image_question = image_question;
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Image', page.url());
+          // sendTele(error, temp_data, 'GET Image', page.url());
         }
 
 
@@ -225,7 +227,7 @@ require('dotenv').config();
           })
 
         } catch (error) {
-          sendTele(error, temp_data, 'GET Option', page.url());
+          // sendTele(error, temp_data, 'GET Option', page.url());
         }
 
         /**
@@ -236,7 +238,7 @@ require('dotenv').config();
             temp_data.solution = await page.$$eval(elmSolution, (elm) => elm[1].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Solution', page.url());
+          // sendTele(error, temp_data, 'GET Solution', page.url());
         }
 
         /**
@@ -247,7 +249,7 @@ require('dotenv').config();
             temp_data.answer = await page.$$eval(elmAnswer, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Answer', page.url());
+          // sendTele(error, temp_data, 'GET Answer', page.url());
         }
 
         /**
@@ -258,7 +260,7 @@ require('dotenv').config();
             temp_data.correct_answer = await page.$$eval(elmCorrectAnswer, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Correct answer', page.url());
+          // sendTele(error, temp_data, 'GET Correct answer', page.url());
         }
 
         /**
@@ -269,7 +271,7 @@ require('dotenv').config();
             temp_data.note = await page.$$eval(elmNote, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Note', page.url());
+          // sendTele(error, temp_data, 'GET Note', page.url());
         }
 
 
@@ -289,7 +291,7 @@ require('dotenv').config();
             temp_data.list_relate = image_question;
           })
         } catch (error) {
-          sendTele(error, temp_data, 'GET Image', page.url());
+          // sendTele(error, temp_data, 'GET Image', page.url());
         }
 
         /**
@@ -313,7 +315,8 @@ require('dotenv').config();
         if (number_questions >= limit_questions) {
           number_topics = number_topics + 1;
           number_questions = 0;
-          saveData(data);
+          await saveData(data);
+          fs.writeFileSync(url_question + '.json', JSON.stringify(data));
           await page.goto(listSubjects[number_subjects].url)
           data = [];
           console.log("**********  DONE 1 STEP TOPIC *********** \n");
@@ -327,7 +330,6 @@ require('dotenv').config();
       if (number_topics >= limit_topics) {
         number_subjects = number_subjects + 1;
         number_topics = 0;
-        saveData(data);
         console.log("**********  DONE 1 STEP TOPIC *********** \n");
         await page.goto(listSubjects[number_subjects].url);
         break;
@@ -346,8 +348,7 @@ require('dotenv').config();
 })();
 
 
-function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
-  // if (note !== 'GET Image' && note !== 'GET Tag' && note !== 'GET Note') {
+async function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
   let html = '';
   html += '<b>[Error] : </b><code>' + JSON.stringify(error) + '</code> \n';
   html += '<b>[Message] : </b><code>' + note + '</code> \n';
@@ -355,22 +356,29 @@ function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
   html += '<b>[Line] : </b><code>' + line + '</code> \n';
   html += '<b>[Data] : </b><code>' + JSON.stringify(data_tpm) + '</code> \n';
 
-  axios.post(process.env.TELE_URL, {
-    chat_id: process.env.TELE_CHAT_ID,
-    text: html,
-  }).then(function (response) {
-  })
-    .catch(function (error) {
+  try {
+    await axios.post(process.env.TELE_URL, {
+      chat_id: process.env.TELE_CHAT_ID,
+      text: html,
+    }).then(function (response) {
     });
-  // }
+  } catch (error) {
+    console.log('LOCAL LOG: ERROR SEND TELEGRAM');
+    console.log(error);
+    exit;
+  }
 }
 
-function saveData(data) {
-  axios.post(process.env.HOST_LOCAL, data)
-    .then(function (response) {
+async function saveData(data) {
+  try {
+    await axios.post(process.env.HOST_LOCAL, data)
+      .then(function (response) {
 
-    })
-    .catch(function (error) {
-      sendTele(error, data, 'Error Saved Database');
-    });
+      })
+      .catch(function (error) {
+        sendTele(error, data, 'Error Saved Database');
+      });
+  } catch (error) {
+    sendTele(error, data, 'LOCAL LOG: ERROR SAVE DATA');
+  }
 }
