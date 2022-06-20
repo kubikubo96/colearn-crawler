@@ -100,9 +100,9 @@ const fs = require('fs');
               element[number_questions].click()
             }, number_questions);
 
-            console.log("[subjects] limit:  " + limit_subjects + ", number:  " + (number_subjects + 1));
-            console.log("[topics] limit:    " + limit_topics + ", number:  " + (number_topics + 1));
-            console.log("[questions] limit: " + limit_questions + ", number: " + (number_questions + 1));
+            console.log("[subjects] limit:  " + limit_subjects + ", number:  " + number_subjects);
+            console.log("[topics] limit:    " + limit_topics + ", number:  " + number_topics);
+            console.log("[questions] limit: " + limit_questions + ", number: " + number_questions);
           });
 
         } catch (error) {
