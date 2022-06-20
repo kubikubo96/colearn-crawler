@@ -9,7 +9,6 @@ require('dotenv').config();
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
-  await page.setViewport({ width: 0, height: 0 });
 
   const listSubjects = [
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html', 'name': 'toan' },
@@ -37,7 +36,7 @@ require('dotenv').config();
   var limit_questions = 0;
 
   var number_subjects = 0;
-  var number_topics = 0;
+  var number_topics = 9;
   var number_questions = 0;
 
   var title_subject = '';
@@ -51,7 +50,12 @@ require('dotenv').config();
      * B1. Go 1 subject
      */
     try {
-      await page.goto(listSubjects[number_subjects].url)
+      await page.goto(listSubjects[number_subjects].url, {
+        waitUntil: 'load',
+        timeout: 0
+      })
+      await page.setDefaultNavigationTimeout(0);
+
 
       title_subject = await page.$$eval('.menu .menu__item-name', (elm, number_subjects) => {
         return elm[number_subjects].getAttribute('title')
@@ -316,7 +320,10 @@ require('dotenv').config();
           number_topics = number_topics + 1;
           number_questions = 0;
           saveData(data);
-          await page.goto(listSubjects[number_subjects].url)
+          await page.goto(listSubjects[number_subjects].url, {
+            waitUntil: 'load',
+            timeout: 0
+          })
           data = [];
           console.log("**********  DONE 1 STEP TOPIC *********** \n");
           break;
@@ -331,7 +338,10 @@ require('dotenv').config();
         number_topics = 0;
         saveData(data);
         console.log("**********  DONE 1 STEP TOPIC *********** \n");
-        await page.goto(listSubjects[number_subjects].url)
+        await page.goto(listSubjects[number_subjects].url, {
+          waitUntil: 'load',
+          timeout: 0
+        })
         break;
       }
     }
