@@ -31,13 +31,14 @@ require('dotenv').config();
 
   var data = [];
   var total = 0;
-  var number_subjects = 10;
-  var number_topics = 0;
-  var number_questions = 0;
 
-  var limit_subjects = 1;
+  var limit_subjects = 10;
   var limit_topics = 1;
   var limit_questions = 0;
+
+  var number_subjects = 0;
+  var number_topics = 0;
+  var number_questions = 0;
 
   var title_subject = '';
   var name_topic = '';
