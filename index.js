@@ -117,9 +117,9 @@ require('dotenv').config();
         let elmQuestion = '#quiz-single .content-quiz';
         let elmImageQuestion = '#quiz-single img';
         let elmOption = '.vn-box-answer .row > div';
+        let elmCorrectAnswer = '.anwsers-correct span span';
         let elmSolution = '.content-solution .solution-item p';
         let elmAnswer = '#quiz-solution .solution-item div';
-        let elmCorrectAnswer = '.anwsers-correct span span';
         let elmNote = '.content-solution .note';
 
         let temp_data = {
@@ -271,6 +271,9 @@ require('dotenv').config();
           sendTele(error, temp_data, 'GET Note', page.url());
         }
 
+        /**
+         * push data
+         */
         if (number_questions < limit_questions) {
           data.push(temp_data)
           number_questions = number_questions + 1;
@@ -283,7 +286,9 @@ require('dotenv').config();
           await page.goBack()
         }
 
-        //break
+        /**
+         * break questions
+         */
         if (number_questions >= limit_questions) {
           number_topics = number_topics + 1;
           number_questions = 0;
@@ -295,7 +300,9 @@ require('dotenv').config();
         }
       }
 
-      //break
+      /**
+       * break topic
+       */
       if (number_topics >= limit_topics) {
         number_subjects = number_subjects + 1;
         number_topics = 0;
@@ -306,7 +313,9 @@ require('dotenv').config();
       }
     }
 
-    //break
+    /**
+     * break subjects: Finish
+     */
     if (number_subjects >= limit_subjects) {
       console.log("************* !!! FINISH ALL !!!! ************* \n");
       break;
@@ -317,22 +326,22 @@ require('dotenv').config();
 
 
 function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
-  if (note != 'GET Image' && note != 'GET Tag' && note != 'GET Note') {
-    let html = '';
-    html += '<b>[Lỗi] : </b><code>' + JSON.stringify(error) + '</code> \n';
-    html += '<b>[Note] : </b><code>' + note + '</code> \n';
-    html += '<b>[URL] : </b><code>' + url + '</code> \n';
-    html += '<b>[line] : </b><code>' + line + '</code> \n';
-    html += '<b>[data] : </b><code>' + JSON.stringify(data_tpm) + '</code> \n';
+  // if (note !== 'GET Image' && note !== 'GET Tag' && note !== 'GET Note') {
+  let html = '';
+  html += '<b>[Error] : </b><code>' + JSON.stringify(error) + '</code> \n';
+  html += '<b>[Message] : </b><code>' + note + '</code> \n';
+  html += '<b>[URL] : </b><code>' + url + '</code> \n';
+  html += '<b>[Line] : </b><code>' + line + '</code> \n';
+  html += '<b>[Data] : </b><code>' + JSON.stringify(data_tpm) + '</code> \n';
 
-    axios.post(process.env.TELE_URL, {
-      chat_id: process.env.TELE_CHAT_ID,
-      text: html,
-    }).then(function (response) {
-    })
-      .catch(function (error) {
-      });
-  }
+  axios.post(process.env.TELE_URL, {
+    chat_id: process.env.TELE_CHAT_ID,
+    text: html,
+  }).then(function (response) {
+  })
+    .catch(function (error) {
+    });
+  // }
 }
 
 function saveData(data) {
