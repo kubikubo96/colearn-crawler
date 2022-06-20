@@ -5,7 +5,7 @@ require('dotenv').config();
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
@@ -31,7 +31,7 @@ require('dotenv').config();
 
   var data = [];
   var total = 0;
-  var number_subjects = 0;
+  var number_subjects = 10;
   var number_topics = 0;
   var number_questions = 0;
 
@@ -69,7 +69,7 @@ require('dotenv').config();
       try {
         await page.waitForSelector(elmTopics).then(async () => {
 
-          // limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
+          limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
 
           name_topic = await page.$$eval(elmTopics, (elm, number_topics) => {
             return elm[number_topics].getAttribute('title')
