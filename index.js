@@ -6,7 +6,7 @@ require('dotenv').config();
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
