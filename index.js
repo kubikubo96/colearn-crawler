@@ -26,9 +26,9 @@ require('dotenv').config();
   var number_topics = 0;
   var number_questions = 0;
 
-  var limit_subjects = 0;
-  var limit_topics = 0;
-  var limit_questions = 0;
+  var limit_subjects = 1;
+  var limit_topics = 1;
+  var limit_questions = 1;
 
   var name_subject = '';
   var name_topic = '';
@@ -75,9 +75,6 @@ require('dotenv').config();
           await page.$$eval(elmTopics, (element, number_topics) => {
             element[number_topics].click()
           }, number_topics);
-          if (number_topics > limit_topics) {
-            number_subjects = number_subjects + 1;
-          }
         });
       } catch (error) {
         sendTele(error, [], 'waitForSelector elmTopics');
@@ -99,14 +96,10 @@ require('dotenv').config();
             await page.$$eval(elmQuestions, (element, number_questions) => {
               element[number_questions].click()
             }, number_questions);
-            if (number_questions > limit_questions) {
-              number_topics = number_topics + 1;
-            }
 
             console.log("[subjects] limit:  " + limit_subjects + ", number:  " + number_subjects);
             console.log("[topics] limit:    " + limit_topics + ", number:  " + number_topics);
             console.log("[questions] limit: " + limit_questions + ", number: " + number_questions);
-
           });
 
         } catch (error) {
@@ -283,6 +276,7 @@ require('dotenv').config();
 
         //break
         if (number_questions >= limit_questions) {
+          number_topics = number_topics + 1;
           number_questions = 0;
           await page.goBack()
           break;
@@ -291,8 +285,9 @@ require('dotenv').config();
 
       //break
       if (number_topics >= limit_topics) {
-        saveData(data);
+        number_subjects = number_subjects + 1;
         number_topics = 0;
+        saveData(data);
         console.log("**********  DONE 1 STEP TOPIC *********** \n");
         await page.goBack()
         break;
