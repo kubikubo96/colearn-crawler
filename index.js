@@ -129,6 +129,7 @@ require('dotenv').config();
         let elmNote = '.content-solution .note';
 
         let temp_data = {
+          'url_question': '',
           'name_subject': name_subject,
           'name_topic': name_topic,
           'name': '',
@@ -142,12 +143,19 @@ require('dotenv').config();
           'note': '',
         }
 
+
+        /**
+         * Get URL Question
+         */
+        await page.waitForTimeout('#quiz-single', { timeout: TIME_OUT }).then(() => {
+          temp_data.url_question = page.url();
+        })
+
         /**
          * GET Name
          */
         try {
           await page.waitForSelector(elmName, { timeout: TIME_OUT }).then(async () => {
-            url_question = page.url();
             temp_data.name = await page.$$eval(elmName, (elm) => elm[0].textContent);
           })
         } catch (error) {
@@ -283,6 +291,7 @@ require('dotenv').config();
 
       //break
       if (number_topics >= limit_topics) {
+        saveData(data);
         number_topics = 0;
         console.log("**********  DONE 1 STEP TOPIC *********** \n");
         await page.goBack()
@@ -319,4 +328,14 @@ function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
       .catch(function (error) {
       });
   }
+}
+
+function saveData(data) {
+  axios.post(process.env.HOST_LOCAL, data)
+    .then(function (response) {
+
+    })
+    .catch(function (error) {
+      sendTele(error, data, 'Error Saved Database');
+    });
 }
