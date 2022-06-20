@@ -40,7 +40,7 @@ const { exit } = require('process');
 
   var number_subjects = 0;
   var number_topics = 30;
-  var number_questions = 0;
+  var number_questions = 39;
 
   var title_subject = '';
   var name_topic = '';
@@ -316,7 +316,11 @@ const { exit } = require('process');
           number_topics = number_topics + 1;
           number_questions = 0;
           await saveData(data);
-          fs.writeFileSync(url_question + '.json', JSON.stringify(data));
+
+          let name_file = (temp_data.url_question).replace("https://vungoi.vn/", "");
+
+
+          fs.writeFileSync('tmp/' + name_file + '.json', JSON.stringify(data));
           await page.goto(listSubjects[number_subjects].url)
           data = [];
           console.log("**********  DONE 1 STEP TOPIC *********** \n");
