@@ -14,7 +14,7 @@ require('dotenv').config();
   const baseUrl = 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html'
   await page.goto(baseUrl);
 
-  const TIME_OUT = 1000;
+  const TIME_OUT = 100;
 
   const elmSubjects = '.menu a';
   const elmTopics = '.list-chapters .sub-string';
@@ -24,10 +24,10 @@ require('dotenv').config();
   var total = 0;
   var number_subjects = 0;
   var number_topics = 0;
-  var number_questions = 0;
+  var number_questions = 25;
 
   var limit_subjects = 1;
-  var limit_topics = 1;
+  var limit_topics = 2;
   var limit_questions = 1;
 
   var name_subject = '';
@@ -97,9 +97,9 @@ require('dotenv').config();
               element[number_questions].click()
             }, number_questions);
 
-            console.log("[subjects] limit:  " + limit_subjects + ", number:  " + number_subjects);
-            console.log("[topics] limit:    " + limit_topics + ", number:  " + number_topics);
-            console.log("[questions] limit: " + limit_questions + ", number: " + number_questions);
+            console.log("[subjects] limit:  " + limit_subjects + ", number:  " + (number_subjects + 1));
+            console.log("[topics] limit:    " + limit_topics + ", number:  " + (number_topics + 1));
+            console.log("[questions] limit: " + limit_questions + ", number: " + (number_questions + 1));
           });
 
         } catch (error) {
@@ -278,7 +278,10 @@ require('dotenv').config();
         if (number_questions >= limit_questions) {
           number_topics = number_topics + 1;
           number_questions = 0;
-          await page.goBack()
+          saveData(data);
+          data = [];
+          await page.goBack();
+          console.log("**********  DONE 1 STEP TOPIC *********** \n");
           break;
         }
       }
@@ -297,7 +300,6 @@ require('dotenv').config();
     //break
     await page.waitForTimeout(2000);
     if (number_subjects >= limit_subjects) {
-      fs.writeFileSync('questions.json', JSON.stringify(data));
       console.log("************* !!! FINISH ALL !!!! ************* \n");
       break;
     }
