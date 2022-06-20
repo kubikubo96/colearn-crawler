@@ -40,7 +40,7 @@ const { exit } = require('process');
 
   var number_subjects = 0;
   var number_topics = 30;
-  var number_questions = 39;
+  var number_questions = 0;
 
   var title_subject = '';
   var name_topic = '';
@@ -139,8 +139,7 @@ const { exit } = require('process');
           'solution': '',
           'answer': '',
           'correct_answer': '',
-          'note': '',
-          'list_relate': []
+          'note': ''
         }
 
         /**
@@ -274,26 +273,6 @@ const { exit } = require('process');
           // sendTele(error, temp_data, 'GET Note', page.url());
         }
 
-
-        /**
-        * GET List relate
-        */
-        try {
-          await page.waitForSelector(elmListRelate, { timeout: TIME_OUT }).then(async () => {
-            const image_question = await page.evaluate(async (elmListRelate) => {
-              let elm = document.querySelectorAll(elmListRelate)
-              elm = [...elm]
-              let data = elm.map(item => ({
-                href: item.getAttribute('href'),
-              }));
-              return data;
-            }, elmListRelate)
-            temp_data.list_relate = image_question;
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Image', page.url());
-        }
-
         /**
          * push data
          */
@@ -318,8 +297,6 @@ const { exit } = require('process');
           await saveData(data);
 
           let name_file = (temp_data.url_question).replace("https://vungoi.vn/", "");
-
-
           fs.writeFileSync('tmp/' + name_file + '.json', JSON.stringify(data));
           await page.goto(listSubjects[number_subjects].url)
           data = [];
@@ -368,7 +345,8 @@ async function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
     });
   } catch (error) {
     console.log('LOCAL LOG: ERROR SEND TELEGRAM');
-    console.log(error);
+    let name_file = (temp_data.url_question).replace("https://vungoi.vn/", "");
+    fs.writeFileSync('errors/' + name_file + '.json', JSON.stringify(error));
     exit;
   }
 }
@@ -383,6 +361,8 @@ async function saveData(data) {
         sendTele(error, data, 'Error Saved Database');
       });
   } catch (error) {
-    sendTele(error, data, 'LOCAL LOG: ERROR SAVE DATA');
+    console.log('LOCAL LOG: ERROR SAVE DATA');
+    let name_file = (temp_data.url_question).replace("https://vungoi.vn/", "");
+    fs.writeFileSync('errors/' + name_file + '.json', JSON.stringify(error));
   }
 }

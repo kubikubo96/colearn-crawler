@@ -2,4 +2,5 @@
 /storage
 .env
 questions.json
-/tmp
+tmp/*
+errors/*
