@@ -14,7 +14,7 @@ require('dotenv').config();
   const baseUrl = 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html'
   await page.goto(baseUrl);
 
-  const TIME_OUT = 100;
+  const TIME_OUT = 1000;
 
   const elmSubjects = '.menu a';
   const elmTopics = '.list-chapters .sub-string';
@@ -30,7 +30,6 @@ require('dotenv').config();
   var limit_topics = 0;
   var limit_questions = 0;
 
-  var url_question = '';
   var name_subject = '';
   var name_topic = '';
 
@@ -130,7 +129,6 @@ require('dotenv').config();
         let elmNote = '.content-solution .note';
 
         let temp_data = {
-          'url_question': url_question,
           'name_subject': name_subject,
           'name_topic': name_topic,
           'name': '',
@@ -153,7 +151,7 @@ require('dotenv').config();
             temp_data.name = await page.$$eval(elmName, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get name', page.url());
+          sendTele(error, temp_data, 'GET Name', page.url());
         }
 
         /**
@@ -164,7 +162,7 @@ require('dotenv').config();
             temp_data.tag = await page.$$eval(elmTag, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get tag', page.url());
+          sendTele(error, temp_data, ' GET Tag', page.url());
         }
 
         /**
@@ -175,7 +173,7 @@ require('dotenv').config();
             temp_data.question = await page.$$eval(elmQuestion, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get question', page.url());
+          sendTele(error, temp_data, 'GET Question', page.url());
         }
 
         /**
@@ -195,7 +193,7 @@ require('dotenv').config();
             temp_data.image_question = image_question;
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get image', page.url());
+          sendTele(error, temp_data, 'GET Image', page.url());
         }
 
 
@@ -208,8 +206,8 @@ require('dotenv').config();
               let elm = document.querySelectorAll(elmOption)
               elm = [...elm]
               let data = elm.map(item => ({
-                title: item.querySelector('.text-uppercase').textContent,
-                content: item.querySelector('div p').textContent,
+                title: item.textContent.charAt(0),
+                content: item.textContent.slice(2),
               }));
               return data;
             }, elmOption)
@@ -217,7 +215,7 @@ require('dotenv').config();
           })
 
         } catch (error) {
-          sendTele(error, temp_data, 'get option', page.url());
+          sendTele(error, temp_data, 'GET Option', page.url());
         }
 
         /**
@@ -228,7 +226,7 @@ require('dotenv').config();
             temp_data.solution = await page.$$eval(elmSolution, (elm) => elm[1].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get solution', page.url());
+          sendTele(error, temp_data, 'GET Solution', page.url());
         }
 
         /**
@@ -239,7 +237,7 @@ require('dotenv').config();
             temp_data.answer = await page.$$eval(elmAnswer, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get answer', page.url());
+          sendTele(error, temp_data, 'GET Answer', page.url());
         }
 
         /**
@@ -250,7 +248,7 @@ require('dotenv').config();
             temp_data.correct_answer = await page.$$eval(elmCorrectAnswer, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get correct answer', page.url());
+          sendTele(error, temp_data, 'GET Correct answer', page.url());
         }
 
         /**
@@ -261,16 +259,17 @@ require('dotenv').config();
             temp_data.note = await page.$$eval(elmNote, (elm) => elm[0].textContent);
           })
         } catch (error) {
-          sendTele(error, temp_data, 'get note', page.url());
+          sendTele(error, temp_data, 'GET Note', page.url());
         }
 
+        data.push(temp_data)
+        number_questions = number_questions + 1;
+        total = total + 1;
 
         console.log("=================================");
         console.log("||          " + total + "       ||");
         console.log("=================================");
-        data.push(temp_data)
-        number_questions = number_questions + 1;
-        total = total + 1;
+
         await page.goBack()
         // await page.waitForTimeout(2000 * 1000);
 
