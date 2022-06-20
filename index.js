@@ -10,7 +10,6 @@ const fs = require('fs');
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
-  page.setDefaultTimeout(0);
 
   const listSubjects = [
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html', 'name': 'toan' },
@@ -38,7 +37,7 @@ const fs = require('fs');
   var limit_questions = 0;
 
   var number_subjects = 0;
-  var number_topics = 31;
+  var number_topics = 42;
   var number_questions = 0;
 
   var title_subject = '';
