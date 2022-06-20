@@ -2,7 +2,6 @@ const puppeteer = require('puppeteer');
 const axios = require('axios').default;
 require('dotenv').config();
 const fs = require('fs');
-const { exit } = require('process');
 
 
 (async () => {
@@ -39,7 +38,7 @@ const { exit } = require('process');
   var limit_questions = 0;
 
   var number_subjects = 0;
-  var number_topics = 30;
+  var number_topics = 31;
   var number_questions = 0;
 
   var title_subject = '';
@@ -296,7 +295,7 @@ const { exit } = require('process');
           number_questions = 0;
           await saveData(data);
 
-          let name_file = (temp_data.url_question).replace("https://vungoi.vn/", "");
+          let name_file = removeAccents(name_topic);
           fs.writeFileSync('tmp/' + name_file + '.json', JSON.stringify(data));
           await page.goto(listSubjects[number_subjects].url)
           data = [];
@@ -345,9 +344,8 @@ async function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
     });
   } catch (error) {
     console.log('LOCAL LOG: ERROR SEND TELEGRAM');
-    let name_file = (temp_data.url_question).replace("https://vungoi.vn/", "");
+    let name_file = removeAccents(name_topic);
     fs.writeFileSync('errors/' + name_file + '.json', JSON.stringify(error));
-    exit;
   }
 }
 
@@ -362,7 +360,31 @@ async function saveData(data) {
       });
   } catch (error) {
     console.log('LOCAL LOG: ERROR SAVE DATA');
-    let name_file = (temp_data.url_question).replace("https://vungoi.vn/", "");
+    let name_file = removeAccents(name_topic);
     fs.writeFileSync('errors/' + name_file + '.json', JSON.stringify(error));
   }
+}
+
+function removeAccents(str) {
+  var AccentsMap = [
+    "aàảãáạăằẳẵắặâầẩẫấậ",
+    "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+    "dđ", "DĐ",
+    "eèẻẽéẹêềểễếệ",
+    "EÈẺẼÉẸÊỀỂỄẾỆ",
+    "iìỉĩíị",
+    "IÌỈĨÍỊ",
+    "oòỏõóọôồổỗốộơờởỡớợ",
+    "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+    "uùủũúụưừửữứự",
+    "UÙỦŨÚỤƯỪỬỮỨỰ",
+    "yỳỷỹýỵ",
+    "YỲỶỸÝỴ"
+  ];
+  for (var i = 0; i < AccentsMap.length; i++) {
+    var re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+    var char = AccentsMap[i][0];
+    str = str.replace(re, char);
+  }
+  return str.trim().replace(/\s/g, '-');;
 }
