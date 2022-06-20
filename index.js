@@ -9,6 +9,7 @@ require('dotenv').config();
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
+  page.setDefaultTimeout(0);
 
   const listSubjects = [
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html', 'name': 'toan' },
@@ -23,7 +24,7 @@ require('dotenv').config();
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-gdcd-s5d61eaf3ea5cb900220fa953.html', 'name': 'gdcd' },
   ];
 
-  const TIME_OUT = 200;
+  const TIME_OUT = 1000;
 
   const elmTopics = '.list-chapters .sub-string';
   const elmQuestions = '#list_relate-quiz .quiz-relate-item a';
@@ -36,7 +37,7 @@ require('dotenv').config();
   var limit_questions = 0;
 
   var number_subjects = 0;
-  var number_topics = 9;
+  var number_topics = 25;
   var number_questions = 0;
 
   var title_subject = '';
@@ -50,12 +51,7 @@ require('dotenv').config();
      * B1. Go 1 subject
      */
     try {
-      await page.goto(listSubjects[number_subjects].url, {
-        waitUntil: 'load',
-        timeout: 0
-      })
-      await page.setDefaultNavigationTimeout(0);
-
+      await page.goto(listSubjects[number_subjects].url)
 
       title_subject = await page.$$eval('.menu .menu__item-name', (elm, number_subjects) => {
         return elm[number_subjects].getAttribute('title')
@@ -72,7 +68,7 @@ require('dotenv').config();
         * B2. Go 1 topic
         */
       try {
-        await page.waitForSelector(elmTopics).then(async () => {
+        await page.waitForSelector(elmTopics, { timeout: TIME_OUT }).then(async () => {
 
           limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
 
@@ -96,7 +92,7 @@ require('dotenv').config();
         * B3. Go 1 question
         */
         try {
-          await page.waitForSelector(elmQuestions).then(async () => {
+          await page.waitForSelector(elmQuestions, { timeout: TIME_OUT }).then(async () => {
 
             limit_questions = await page.$$eval(elmQuestions, (elm) => elm.length);
 
@@ -145,8 +141,6 @@ require('dotenv').config();
           'list_relate': []
         }
 
-
-        await page.waitForTimeout(2000);
         /**
          * Get URL Question
          */
@@ -320,10 +314,7 @@ require('dotenv').config();
           number_topics = number_topics + 1;
           number_questions = 0;
           saveData(data);
-          await page.goto(listSubjects[number_subjects].url, {
-            waitUntil: 'load',
-            timeout: 0
-          })
+          await page.goto(listSubjects[number_subjects].url)
           data = [];
           console.log("**********  DONE 1 STEP TOPIC *********** \n");
           break;
@@ -338,10 +329,7 @@ require('dotenv').config();
         number_topics = 0;
         saveData(data);
         console.log("**********  DONE 1 STEP TOPIC *********** \n");
-        await page.goto(listSubjects[number_subjects].url, {
-          waitUntil: 'load',
-          timeout: 0
-        })
+        await page.goto(listSubjects[number_subjects].url);
         break;
       }
     }
