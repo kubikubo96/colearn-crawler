@@ -24,18 +24,18 @@ require('dotenv').config();
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-gdcd-s5d61eaf3ea5cb900220fa953.html', 'name': 'gdcd' },
   ];
 
-  const TIME_OUT = 1000;
+  const TIME_OUT = 200;
 
   const elmTopics = '.list-chapters .sub-string';
   const elmQuestions = '#list_relate-quiz .quiz-relate-item a';
 
   var data = [];
   var total = 0;
-  var number_subjects = 0;
+  var number_subjects = 10;
   var number_topics = 0;
   var number_questions = 0;
 
-  var limit_subjects = 10;
+  var limit_subjects = 1;
   var limit_topics = 1;
   var limit_questions = 0;
 
@@ -121,6 +121,7 @@ require('dotenv').config();
         let elmSolution = '.content-solution .solution-item p';
         let elmAnswer = '#quiz-solution .solution-item div';
         let elmNote = '.content-solution .note';
+        let elmListRelate = '#list-quiz-relate .row.quiz-relate-item a';
 
         let temp_data = {
           'url_question': '',
@@ -136,6 +137,7 @@ require('dotenv').config();
           'answer': '',
           'correct_answer': '',
           'note': '',
+          'list_relate': []
         }
 
 
@@ -269,6 +271,26 @@ require('dotenv').config();
           })
         } catch (error) {
           sendTele(error, temp_data, 'GET Note', page.url());
+        }
+
+
+        /**
+        * GET List relate
+        */
+        try {
+          await page.waitForSelector(elmListRelate, { timeout: TIME_OUT }).then(async () => {
+            const image_question = await page.evaluate(async (elmListRelate) => {
+              let elm = document.querySelectorAll(elmListRelate)
+              elm = [...elm]
+              let data = elm.map(item => ({
+                href: item.getAttribute('href'),
+              }));
+              return data;
+            }, elmListRelate)
+            temp_data.list_relate = image_question;
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'GET Image', page.url());
         }
 
         /**
