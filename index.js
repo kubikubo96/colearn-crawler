@@ -1,17 +1,15 @@
 const puppeteer = require('puppeteer');
 const axios = require('axios').default;
-const fs = require('fs');
 require('dotenv').config();
 
 
 (async () => {
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: false,
     // args: ['--window-size=1900,1000'],
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 0, height: 0 });
-  const baseUrl = 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html';
 
   const listSubjects = [
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-toan-s5af3ead5f4ed8c11759c1ade.html', 'name': 'toan' },
@@ -26,11 +24,8 @@ require('dotenv').config();
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-gdcd-s5d61eaf3ea5cb900220fa953.html', 'name': 'gdcd' },
   ];
 
-  // await page.goto(baseUrl);
+  const TIME_OUT = 1000;
 
-  const TIME_OUT = 1500;
-
-  const elmSubjects = '.menu a';
   const elmTopics = '.list-chapters .sub-string';
   const elmQuestions = '#list_relate-quiz .quiz-relate-item a';
 
@@ -38,14 +33,13 @@ require('dotenv').config();
   var total = 0;
   var number_subjects = 0;
   var number_topics = 0;
-  var number_questions = 28;
+  var number_questions = 0;
 
-  var limit_subjects = 10;
-  var limit_topics = 0;
+  var limit_subjects = 1;
+  var limit_topics = 1;
   var limit_questions = 0;
 
   var title_subject = '';
-  var name_subject = '';
   var name_topic = '';
 
   /**
@@ -57,6 +51,7 @@ require('dotenv').config();
      */
     try {
       await page.goto(listSubjects[number_subjects].url)
+
       title_subject = await page.$$eval('.menu .menu__item-name', (elm, number_subjects) => {
         return elm[number_subjects].getAttribute('title')
       }, number_subjects);
@@ -74,7 +69,7 @@ require('dotenv').config();
       try {
         await page.waitForSelector(elmTopics).then(async () => {
 
-          limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
+          // limit_topics = await page.$$eval(elmTopics, (elm) => elm.length);
 
           name_topic = await page.$$eval(elmTopics, (elm, number_topics) => {
             return elm[number_topics].getAttribute('title')
@@ -144,12 +139,17 @@ require('dotenv').config();
         }
 
 
+        await page.waitForTimeout(2000);
         /**
          * Get URL Question
          */
-        await page.waitForTimeout('#quiz-single', { timeout: TIME_OUT }).then(() => {
-          temp_data.url_question = page.url();
-        })
+        try {
+          await page.waitForSelector('#quiz-single', { timeout: TIME_OUT }).then(() => {
+            temp_data.url_question = page.url();
+          })
+        } catch (error) {
+          sendTele(error, temp_data, 'GET Name', page.url());
+        }
 
         /**
          * GET Name
@@ -307,7 +307,6 @@ require('dotenv').config();
     }
 
     //break
-    await page.waitForTimeout(2000);
     if (number_subjects >= limit_subjects) {
       console.log("************* !!! FINISH ALL !!!! ************* \n");
       break;
@@ -318,7 +317,7 @@ require('dotenv').config();
 
 
 function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
-  if (error.name != 'TimeoutError') {
+  if (note != 'GET Image' && note != 'GET Tag' && note != 'GET Note') {
     let html = '';
     html += '<b>[Lỗi] : </b><code>' + JSON.stringify(error) + '</code> \n';
     html += '<b>[Note] : </b><code>' + note + '</code> \n';
