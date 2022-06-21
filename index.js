@@ -33,7 +33,7 @@ const fs = require('fs');
   var total = 0;
 
   var limit_subjects = 10;
-  var limit_topics = 1;
+  var limit_topics = 0;
   var limit_questions = 0;
 
   var number_subjects = 0;
@@ -139,10 +139,10 @@ const fs = require('fs');
           'note': ''
         }
 
-        page.waitForTimeout(2000).then(() => {
+        await page.waitForTimeout(2000).then(async () => {
           /**
-         * Get URL Question
-         */
+           * Get URL Question
+           */
           try {
             await page.waitForSelector('#quiz-single', { timeout: TIME_OUT }).then(() => {
               temp_data.url_question = page.url();
@@ -163,8 +163,8 @@ const fs = require('fs');
           }
 
           /**
-          * GET Tag
-          */
+            * GET Tag
+            */
           try {
             await page.waitForSelector(elmTag, { timeout: TIME_OUT }).then(async () => {
               temp_data.tag = await page.$$eval(elmTag, (elm) => elm[0].textContent);
@@ -174,8 +174,8 @@ const fs = require('fs');
           }
 
           /**
-          * GET Question
-          */
+            * GET Question
+            */
           try {
             await page.waitForSelector(elmQuestion, { timeout: TIME_OUT }).then(async () => {
               temp_data.question = await page.$$eval(elmQuestion, (elm) => elm[0].textContent);
@@ -185,8 +185,8 @@ const fs = require('fs');
           }
 
           /**
-          * GET Image
-          */
+           * GET Image
+           */
           try {
             await page.waitForSelector(elmImageQuestion, { timeout: TIME_OUT }).then(async () => {
               const image_question = await page.evaluate(async (elmImageQuestion) => {
@@ -206,8 +206,8 @@ const fs = require('fs');
 
 
           /**
-          * GET Option
-          */
+            * GET Option
+            */
           try {
             await page.waitForSelector(elmOption, { timeout: TIME_OUT }).then(async () => {
               temp_data.url_question = page.url();
@@ -228,8 +228,8 @@ const fs = require('fs');
           }
 
           /**
-          * GET Solution
-          */
+            * GET Solution
+            */
           try {
             await page.waitForSelector(elmSolution, { timeout: TIME_OUT }).then(async () => {
               temp_data.solution = await page.$$eval(elmSolution, (elm) => elm[1].textContent);
@@ -239,8 +239,8 @@ const fs = require('fs');
           }
 
           /**
-          * GET Answer
-          */
+            * GET Answer
+            */
           try {
             await page.waitForSelector(elmAnswer, { timeout: TIME_OUT }).then(async () => {
               temp_data.answer = await page.$$eval(elmAnswer, (elm) => elm[0].textContent);
@@ -250,8 +250,8 @@ const fs = require('fs');
           }
 
           /**
-          * GET Correct answer
-          */
+            * GET Correct answer
+            */
           try {
             await page.waitForSelector(elmCorrectAnswer, { timeout: TIME_OUT }).then(async () => {
               temp_data.correct_answer = await page.$$eval(elmCorrectAnswer, (elm) => elm[0].textContent);
@@ -261,8 +261,8 @@ const fs = require('fs');
           }
 
           /**
-          * GET Note
-          */
+            * GET Note
+            */
           try {
             await page.waitForSelector(elmNote, { timeout: TIME_OUT }).then(async () => {
               temp_data.note = await page.$$eval(elmNote, (elm) => elm[0].textContent);
@@ -270,39 +270,35 @@ const fs = require('fs');
           } catch (error) {
             // sendTele(error, temp_data, 'GET Note', page.url());
           }
-        });
+        })
 
-      }
+        /**
+         * push data
+         */
+        if (number_questions < limit_questions) {
+          data.push(temp_data)
+          saveData(data);
+          data = [];
+          number_questions = number_questions + 1;
+          total = total + 1;
 
-      /**
-     * push data
-     */
-      if (number_questions < limit_questions) {
-        data.push(temp_data)
-        saveData(data);
-        data = [];
-        number_questions = number_questions + 1;
-        total = total + 1;
+          console.log("=================================");
+          console.log("||          " + total + "       ||");
+          console.log("=================================");
 
-        console.log("=================================");
-        console.log("||          " + total + "       ||");
-        console.log("=================================");
+          await page.goBack()
+        }
 
-        await page.goBack()
-      }
-
-      /**
-       * break questions
-       */
-      if (number_questions >= limit_questions) {
-        number_topics = number_topics + 1;
-        number_questions = 0;
-        // saveData(data);
-
-        await page.goto(listSubjects[number_subjects].url)
-        // data = [];
-        console.log("**********  DONE 1 STEP TOPIC *********** \n");
-        break;
+        /**
+         * break questions
+         */
+        if (number_questions >= limit_questions) {
+          number_topics = number_topics + 1;
+          number_questions = 0;
+          await page.goto(listSubjects[number_subjects].url)
+          console.log("**********  DONE 1 STEP TOPIC *********** \n");
+          break;
+        }
       }
 
       /**
