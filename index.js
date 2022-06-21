@@ -1,7 +1,6 @@
-const puppeteer = require('puppeteer');
-const axios = require('axios').default;
-require('dotenv').config();
-const fs = require('fs');
+import puppeteer from 'puppeteer'
+import axios from 'axios'
+import 'dotenv/config'
 
 
 (async () => {
@@ -334,6 +333,7 @@ async function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
   html += '<b>[Data] : </b><code>' + JSON.stringify(data_tpm) + '</code> \n';
 
   try {
+    console.log(process.env.TELE_URL);
     await axios.post(process.env.TELE_URL, {
       chat_id: process.env.TELE_CHAT_ID,
       text: html,
@@ -346,7 +346,7 @@ async function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
 
 function saveData(data) {
   try {
-    axios.post(process.env.HOST_LOCAL, data)
+    axios.post('http://basic.laravel.local/crawler/store', data)
       .then(function (response) {
 
       })
