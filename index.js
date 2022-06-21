@@ -24,7 +24,7 @@ const fs = require('fs');
     { 'url': 'https://vungoi.vn/lop-12/bai-tap-mon-gdcd-s5d61eaf3ea5cb900220fa953.html', 'name': 'gdcd' },
   ];
 
-  const TIME_OUT = 1000;
+  const TIME_OUT = 2000;
 
   const elmTopics = '.list-chapters .sub-string';
   const elmQuestions = '#list_relate-quiz .quiz-relate-item a';
@@ -37,7 +37,7 @@ const fs = require('fs');
   var limit_questions = 0;
 
   var number_subjects = 0;
-  var number_topics = 42;
+  var number_topics = 0;
   var number_questions = 0;
 
   var title_subject = '';
@@ -106,7 +106,7 @@ const fs = require('fs');
           });
 
         } catch (error) {
-          await sendTele(error, [], 'waitForSelector elmQuestions');
+          // await sendTele(error, [], 'waitForSelector elmQuestions');
         }
 
         /**
@@ -122,7 +122,6 @@ const fs = require('fs');
         let elmSolution = '.content-solution .solution-item p';
         let elmAnswer = '#quiz-solution .solution-item div';
         let elmNote = '.content-solution .note';
-        let elmListRelate = '#list-quiz-relate .row.quiz-relate-item a';
 
         let temp_data = {
           'url_question': '',
@@ -140,167 +139,170 @@ const fs = require('fs');
           'note': ''
         }
 
-        /**
+        page.waitForTimeout(2000).then(() => {
+          /**
          * Get URL Question
          */
-        try {
-          await page.waitForSelector('#quiz-single', { timeout: TIME_OUT }).then(() => {
-            temp_data.url_question = page.url();
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Name', page.url());
-        }
+          try {
+            await page.waitForSelector('#quiz-single', { timeout: TIME_OUT }).then(() => {
+              temp_data.url_question = page.url();
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Name', page.url());
+          }
 
-        /**
-         * GET Name
-         */
-        try {
-          await page.waitForSelector(elmName, { timeout: TIME_OUT }).then(async () => {
-            temp_data.name = await page.$$eval(elmName, (elm) => elm[0].textContent);
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Name', page.url());
-        }
+          /**
+           * GET Name
+           */
+          try {
+            await page.waitForSelector(elmName, { timeout: TIME_OUT }).then(async () => {
+              temp_data.name = await page.$$eval(elmName, (elm) => elm[0].textContent);
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Name', page.url());
+          }
 
-        /**
-        * GET Tag
-        */
-        try {
-          await page.waitForSelector(elmTag, { timeout: TIME_OUT }).then(async () => {
-            temp_data.tag = await page.$$eval(elmTag, (elm) => elm[0].textContent);
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, ' GET Tag', page.url());
-        }
+          /**
+          * GET Tag
+          */
+          try {
+            await page.waitForSelector(elmTag, { timeout: TIME_OUT }).then(async () => {
+              temp_data.tag = await page.$$eval(elmTag, (elm) => elm[0].textContent);
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, ' GET Tag', page.url());
+          }
 
-        /**
-        * GET Question
-        */
-        try {
-          await page.waitForSelector(elmQuestion, { timeout: TIME_OUT }).then(async () => {
-            temp_data.question = await page.$$eval(elmQuestion, (elm) => elm[0].textContent);
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Question', page.url());
-        }
+          /**
+          * GET Question
+          */
+          try {
+            await page.waitForSelector(elmQuestion, { timeout: TIME_OUT }).then(async () => {
+              temp_data.question = await page.$$eval(elmQuestion, (elm) => elm[0].textContent);
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Question', page.url());
+          }
 
-        /**
-        * GET Image
-        */
-        try {
-          await page.waitForSelector(elmImageQuestion, { timeout: TIME_OUT }).then(async () => {
-            const image_question = await page.evaluate(async (elmImageQuestion) => {
-              let elm = document.querySelectorAll(elmImageQuestion)
-              elm = [...elm]
-              let data = elm.map(item => ({
-                src: item.getAttribute('src'),
-                title: item.getAttribute('title')
-              }));
-              return data;
-            }, elmImageQuestion)
-            temp_data.image_question = image_question;
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Image', page.url());
-        }
+          /**
+          * GET Image
+          */
+          try {
+            await page.waitForSelector(elmImageQuestion, { timeout: TIME_OUT }).then(async () => {
+              const image_question = await page.evaluate(async (elmImageQuestion) => {
+                let elm = document.querySelectorAll(elmImageQuestion)
+                elm = [...elm]
+                let data = elm.map(item => ({
+                  src: item.getAttribute('src'),
+                  title: item.getAttribute('title')
+                }));
+                return data;
+              }, elmImageQuestion)
+              temp_data.image_question = image_question;
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Image', page.url());
+          }
 
 
-        /**
-        * GET Option
-        */
-        try {
-          await page.waitForSelector(elmOption, { timeout: TIME_OUT }).then(async () => {
-            temp_data.url_question = page.url();
-            const option = await page.evaluate(async (elmOption) => {
-              let elm = document.querySelectorAll(elmOption)
-              elm = [...elm]
-              let data = elm.map(item => ({
-                title: item.textContent.charAt(0),
-                content: item.textContent.slice(2),
-              }));
-              return data;
-            }, elmOption)
-            temp_data.option = option;
-          })
+          /**
+          * GET Option
+          */
+          try {
+            await page.waitForSelector(elmOption, { timeout: TIME_OUT }).then(async () => {
+              temp_data.url_question = page.url();
+              const option = await page.evaluate(async (elmOption) => {
+                let elm = document.querySelectorAll(elmOption)
+                elm = [...elm]
+                let data = elm.map(item => ({
+                  title: item.textContent.charAt(0),
+                  content: item.textContent.slice(2),
+                }));
+                return data;
+              }, elmOption)
+              temp_data.option = option;
+            })
 
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Option', page.url());
-        }
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Option', page.url());
+          }
 
-        /**
-        * GET Solution
-        */
-        try {
-          await page.waitForSelector(elmSolution, { timeout: TIME_OUT }).then(async () => {
-            temp_data.solution = await page.$$eval(elmSolution, (elm) => elm[1].textContent);
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Solution', page.url());
-        }
+          /**
+          * GET Solution
+          */
+          try {
+            await page.waitForSelector(elmSolution, { timeout: TIME_OUT }).then(async () => {
+              temp_data.solution = await page.$$eval(elmSolution, (elm) => elm[1].textContent);
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Solution', page.url());
+          }
 
-        /**
-        * GET Answer
-        */
-        try {
-          await page.waitForSelector(elmAnswer, { timeout: TIME_OUT }).then(async () => {
-            temp_data.answer = await page.$$eval(elmAnswer, (elm) => elm[0].textContent);
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Answer', page.url());
-        }
+          /**
+          * GET Answer
+          */
+          try {
+            await page.waitForSelector(elmAnswer, { timeout: TIME_OUT }).then(async () => {
+              temp_data.answer = await page.$$eval(elmAnswer, (elm) => elm[0].textContent);
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Answer', page.url());
+          }
 
-        /**
-        * GET Correct answer
-        */
-        try {
-          await page.waitForSelector(elmCorrectAnswer, { timeout: TIME_OUT }).then(async () => {
-            temp_data.correct_answer = await page.$$eval(elmCorrectAnswer, (elm) => elm[0].textContent);
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Correct answer', page.url());
-        }
+          /**
+          * GET Correct answer
+          */
+          try {
+            await page.waitForSelector(elmCorrectAnswer, { timeout: TIME_OUT }).then(async () => {
+              temp_data.correct_answer = await page.$$eval(elmCorrectAnswer, (elm) => elm[0].textContent);
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Correct answer', page.url());
+          }
 
-        /**
-        * GET Note
-        */
-        try {
-          await page.waitForSelector(elmNote, { timeout: TIME_OUT }).then(async () => {
-            temp_data.note = await page.$$eval(elmNote, (elm) => elm[0].textContent);
-          })
-        } catch (error) {
-          // sendTele(error, temp_data, 'GET Note', page.url());
-        }
+          /**
+          * GET Note
+          */
+          try {
+            await page.waitForSelector(elmNote, { timeout: TIME_OUT }).then(async () => {
+              temp_data.note = await page.$$eval(elmNote, (elm) => elm[0].textContent);
+            })
+          } catch (error) {
+            // sendTele(error, temp_data, 'GET Note', page.url());
+          }
+        });
 
-        /**
-         * push data
-         */
-        if (number_questions < limit_questions) {
-          data.push(temp_data)
-          number_questions = number_questions + 1;
-          total = total + 1;
+      }
 
-          console.log("=================================");
-          console.log("||          " + total + "       ||");
-          console.log("=================================");
+      /**
+     * push data
+     */
+      if (number_questions < limit_questions) {
+        data.push(temp_data)
+        saveData(data);
+        data = [];
+        number_questions = number_questions + 1;
+        total = total + 1;
 
-          await page.goBack()
-        }
+        console.log("=================================");
+        console.log("||          " + total + "       ||");
+        console.log("=================================");
 
-        /**
-         * break questions
-         */
-        if (number_questions >= limit_questions) {
-          number_topics = number_topics + 1;
-          number_questions = 0;
-          await saveData(data);
+        await page.goBack()
+      }
 
-          let name_file = removeAccents(name_topic);
-          fs.writeFileSync('tmp/' + name_file + '.json', JSON.stringify(data));
-          await page.goto(listSubjects[number_subjects].url)
-          data = [];
-          console.log("**********  DONE 1 STEP TOPIC *********** \n");
-          break;
-        }
+      /**
+       * break questions
+       */
+      if (number_questions >= limit_questions) {
+        number_topics = number_topics + 1;
+        number_questions = 0;
+        // saveData(data);
+
+        await page.goto(listSubjects[number_subjects].url)
+        // data = [];
+        console.log("**********  DONE 1 STEP TOPIC *********** \n");
+        break;
       }
 
       /**
@@ -343,14 +345,12 @@ async function sendTele(error, data_tpm = [], note = '', url = '', line = 0) {
     });
   } catch (error) {
     console.log('LOCAL LOG: ERROR SEND TELEGRAM');
-    let name_file = removeAccents(name_topic);
-    fs.writeFileSync('errors/' + name_file + '.json', JSON.stringify(error));
   }
 }
 
-async function saveData(data) {
+function saveData(data) {
   try {
-    await axios.post(process.env.HOST_LOCAL, data)
+    axios.post(process.env.HOST_LOCAL, data)
       .then(function (response) {
 
       })
@@ -359,8 +359,6 @@ async function saveData(data) {
       });
   } catch (error) {
     console.log('LOCAL LOG: ERROR SAVE DATA');
-    let name_file = removeAccents(name_topic);
-    fs.writeFileSync('errors/' + name_file + '.json', JSON.stringify(error));
   }
 }
 
